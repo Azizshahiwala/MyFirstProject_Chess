@@ -440,9 +440,6 @@ public class GamePanel extends JPanel implements Runnable{
             c += colStep;
         }
     } 
-    else{
-        System.out.println("knight check");
-    }
 }
     // If no escape, no block, no capture => checkmate
     return  true;
@@ -470,7 +467,7 @@ public class GamePanel extends JPanel implements Runnable{
     public Piece getAttackingPiece(Piece king) {
     for (Piece p : GamePanel.Piece) {
         if (!p.PieceColor.equals(king.PieceColor) && !p.captured) {
-            if (p.CanMove(king.row, king.col)) {
+            if (p.CanMove(p.row, p.col)) {
                 System.out.println("Attacking piece: " +p);
                 return p;
             }
