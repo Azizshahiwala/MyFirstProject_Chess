@@ -236,7 +236,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         if(GAMEOVER)
         {                   
-            String PlayerWinColor = CurrentColor + " Team wins!";
+            String PlayerWinColor = CurrentColor + " wins!";
             System.out.println(PlayerWinColor);
             g.setFont(new Font("Arial",Font.PLAIN,90));
             g.setColor(Color.green);
@@ -259,7 +259,7 @@ public class GamePanel extends JPanel implements Runnable{
         
     }
     private void CheckCastle()
-{
+    {
     if (GamePanel.Castling != null) {
         if (ActivePiece.row == ActivePiece.PrevRow + 2) { // Kingside
             Castling.row = ActivePiece.PrevRow + 1; // Rook moves to the square next to the king
@@ -269,7 +269,7 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
     Castling.x = Castling.GetX(Castling.row);
-}
+    }
 }
     private void update()
     {
