@@ -207,8 +207,8 @@ public class GamePanel extends JPanel implements Runnable{
             }
 
             if(ActivePiece != null)
-        {
-                if((isIllegal(ActivePiece) || OpponentCanCapture()))
+            {
+                if((isIllegal(ActivePiece)))
                 {
                 newG.setColor(Color.red);
                 newG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.7f)); 
@@ -347,7 +347,10 @@ public class GamePanel extends JPanel implements Runnable{
                     }
                     else{
                         if(canPromote()) promotion = true;
-                        else changeTurn();
+                        else {
+                            ActivePiece = null;
+                            changeTurn();
+                        }
                     }  
                     
                     if(StalemateCondition >= 1)
@@ -591,8 +594,12 @@ return false;
     {
         if(King.Ids == Piece_types.KING)
         {
+            
             for(Piece e: Piece)
-            {                       
+            {         
+                if (e == King.PieceHit) {
+                    continue;
+                }               
                 if(!e.captured && e != King && !e.PieceColor.equals(King.PieceColor) && e.CanMove(King.row, King.col, Piece)){
                     return true;
                 }
@@ -608,11 +615,14 @@ return false;
 
         for(Piece piece: Piece)
         {
+            if (piece.row == king.row && piece.col == king.col) {
+                continue; 
+            }
             if(!piece.captured && !piece.PieceColor.equals(king.PieceColor) && piece.CanMove(king.row, king.col, Piece))
-            {     
-                System.out.println("Move blocked! " + piece.PieceColor + " " + piece.Ids + " at Row:" + piece.row + " Col:" + piece.col + " attacks the King!");
+            {        
                 return true;
             }
+            
          } 
         return false;
     }
@@ -621,7 +631,7 @@ return false;
         int OriginalRow = ActivePiece.row;
         int OriginalCol = ActivePiece.col;
 
-        canMove= false;
+        canMove = false;
         ValidSquare = false;
 
         syncStateFromBackup();
@@ -633,44 +643,47 @@ return false;
             Castling = null;
         }
         
-        //Make sure that mouse pointer is between the image, not at top left.
         ActivePiece.x = mouse.x - Board.Half_block;
         ActivePiece.y = mouse.y - Board.Half_block;
 
         ActivePiece.col = ActivePiece.getCol(ActivePiece.x);
         ActivePiece.row = ActivePiece.getRow(ActivePiece.y);
                 
-        // Check if moving to a square occupied by a friendly piece
-    for (Piece e : Piece) {
-        if (e != ActivePiece && e.row == ActivePiece.row && e.col == ActivePiece.col) {
-            if (e.PieceColor.equals(ActivePiece.PieceColor)) {
-                // Friendly piece in target square — disallow move
-                ValidSquare = false;
-                canMove = false;
-                ActivePiece.row = OriginalRow;
-                ActivePiece.col = OriginalCol;
-                return;
+        // 1. FIXED FRIENDLY FIRE: Added !e.captured so dead allies don't block moves
+        for (Piece e : Piece) {
+            if (!e.captured && e != ActivePiece && e.row == ActivePiece.row && e.col == ActivePiece.col) {
+                if (e.PieceColor.equals(ActivePiece.PieceColor)) {
+                    ValidSquare = false;
+                    canMove = false;
+                    ActivePiece.row = OriginalRow;
+                    ActivePiece.col = OriginalCol;
+                    return;
+                }
             }
-        }
-    }     
-        // Basic move and legality check
-    if (ActivePiece.CanMove(ActivePiece.row, ActivePiece.col, Piece)) {
-    
-        if (ActivePiece.PieceHit != null) {
+        }     
+
+        // 2. LEGALITY CHECK
+        if (ActivePiece.CanMove(ActivePiece.row, ActivePiece.col, Piece)) {
+            
+            // Silence the target piece during simulation
+            if (ActivePiece.PieceHit != null) {
                 ActivePiece.PieceHit.captured = true;
             }
-            
-        if (isIllegal(ActivePiece) == false && OpponentCanCapture() == false) {
-        ValidSquare = true;
-        canMove = true;
-        
-        if (ActivePiece.PieceHit != null) {
-            ActivePiece.PieceHit.captured = true;
+                
+            // Check if this move puts our KING in danger (OpponentCanCapture only looks at the King!)
+            if (isIllegal(ActivePiece) == false && OpponentCanCapture() == false) {
+                ValidSquare = true;
+                canMove = true;
+            } else {
+                // FIXED GHOST REVERT: Bring the piece back to life if the move is rejected!
+                if (ActivePiece.PieceHit != null) {
+                    ActivePiece.PieceHit.captured = false;
+                }
+            }
         }
+
+        CheckCastle();
     }
-}
-    CheckCastle();
-}
    public boolean canPromote()
    {    if(ActivePiece.Ids == Piece_types.PAWN){
             if(CurrentColor.equals("White") && ActivePiece.row==0 || CurrentColor.equals("Black") && ActivePiece.row==7)
