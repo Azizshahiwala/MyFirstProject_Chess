@@ -28,39 +28,39 @@ public class King extends Piece{
                     return true;
                 }
            
-           if(Moved == false){
-             // Kingside castling: King moves 2 squares right (PrevRow + 2)
-             if (targetRow == PrevRow + 2 && targetCol == PrevCol && !PieceOnStraightLine(targetRow, targetCol,board)) {
-                for (Piece piece : GamePanel.Piece) {
-                    // Look for unmoved rook on the kingside (at col 7 for king's side)
-                    if (piece.Ids == Piece_types.ROOK && piece.col == PrevCol && piece.row == 7 && !piece.Moved && piece.PieceColor.equals(this.PieceColor)) {
-                        GamePanel.Castling = piece;
-                        return true;
-                    }
-                }
-            }
-            
-            // Queenside castling: King moves 2 squares left (PrevRow - 2)
-            if(targetRow == PrevRow-2 && targetCol == PrevCol && !PieceOnStraightLine(targetRow, targetCol,board))
-            {        
-                for(Piece piece : GamePanel.Piece){
-                    // Look for unmoved rook on the queenside (at col 0 for queen's side)
-                    if(piece.Ids == Piece_types.ROOK && piece.col == PrevCol && piece.row == 0 && !piece.Moved && piece.PieceColor.equals(this.PieceColor)){
-                        // Check that squares between king and rook are empty
-                        Piece Square1 = isColliding(PrevRow - 1, PrevCol,board);
-                        Piece Square2 = isColliding(PrevRow - 2, PrevCol,board);
-                        Piece Square3 = isColliding(PrevRow - 3, PrevCol,board);
-                        
-                        if(Square1 == null && Square2 == null && Square3 == null && !PieceOnStraightLine(PrevRow, targetCol,board))
-                        {
-                            GamePanel.Castling = piece;
-                            return true;
+           
+            if(Moved == false) {
+                // Kingside castling: King moves 2 squares RIGHT
+                if (targetCol == PrevCol + 2 && targetRow == PrevRow) {
+                    for (Piece piece : board) {
+                        // Look for unmoved rook on the kingside (Col 7)
+                        if (piece.Ids == Piece_types.ROOK && piece.col == 7 && piece.row == PrevRow && !piece.Moved && piece.PieceColor.equals(this.PieceColor)) {
+                            // Verify squares between King and Rook are completely empty
+                            Piece square1 = isColliding(PrevRow, PrevCol + 1, board);
+                            Piece square2 = isColliding(PrevRow, PrevCol + 2, board);
+                            
+                            if (square1 == null && square2 == null) {
+                                GamePanel.Castling = piece;
+                                return true;
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
+                
+                // Queenside castling: King moves 2 squares LEFT
+                if (targetCol == PrevCol - 2 && targetRow == PrevRow) {        
+                    for (Piece piece : board) {
+                        // Look for unmoved rook on the queenside (Col 0)
+                        if (piece.Ids == Piece_types.ROOK && piece.col == 0 && piece.row == PrevRow && !piece.Moved && piece.PieceColor.equals(this.PieceColor)) {
+                            // Verify squares between King and Rook are completely empty
+                            Piece square1 = isColliding(PrevRow, PrevCol - 1, board);
+                            Piece square2 = isColliding(PrevRow, PrevCol - 2, board);
+                            Piece square3 = isColliding(PrevRow, PrevCol - 3, board);
+                            
+                            if (square1 == null && square2 == null && square3 == null) {
+                                GamePanel.Castling = piece;
+                                return true;
+                            }}}}}}
         return false;
     }
 }

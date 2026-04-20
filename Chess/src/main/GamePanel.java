@@ -276,21 +276,20 @@ public class GamePanel extends JPanel implements Runnable{
             current.captured = backup.captured;
         }
     }
-    private void CheckCastle()
-    {
-    if (GamePanel.Castling != null) {
-        if (ActivePiece.row == ActivePiece.PrevRow + 2) { // Kingside castling (king moves right)
-            Castling.row = 5;  // Rook moves to f-file (square 5)
-        } 
-        else if (ActivePiece.row == ActivePiece.PrevRow - 2) { // Queenside castling (king moves left)
-            Castling.row = 3;  // Rook moves to d-file (square 3)
+    private void CheckCastle() {
+        if (Castling != null) {
+            if (ActivePiece.col == ActivePiece.PrevCol + 2) { // Kingside castling
+                Castling.col = 5;  // Rook moves to f-file (Col 5)
+            } 
+            else if (ActivePiece.col == ActivePiece.PrevCol - 2) { // Queenside castling
+                Castling.col = 3;  // Rook moves to d-file (Col 3)
+            }
+            
+            // Update both X and Y coordinates to match the new logical column
+            Castling.x = Castling.getX(Castling.col);
+            Castling.y = Castling.getY(Castling.row);
         }
-        
-        // Update both X and Y coordinates
-        Castling.x = Castling.getX(Castling.row);
-        Castling.y = Castling.getY(Castling.col);
     }
-}
     private void update()
     {
         StalemateCondition = isStalemate();
