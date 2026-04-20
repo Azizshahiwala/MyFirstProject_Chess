@@ -1,4 +1,5 @@
 package src.piece;
+import java.util.ArrayList;
 import src.main.GamePanel;
 import src.main.TYPE.Piece_types;
 public class King extends Piece{
@@ -16,38 +17,41 @@ public class King extends Piece{
         img = getImage("/PIECES/black-king");
        }
     }
-    public boolean CanMove(int targetRow, int targetCol){
+    public boolean CanMove(int targetRow, int targetCol, ArrayList<Piece> board){
         if(isWithinBoardLimit(targetRow, targetCol))
         {
             //King's movement restriction.
             if(Math.abs(targetRow - PrevRow) + Math.abs(targetCol - PrevCol) == 1 ||
                 Math.abs(targetRow - PrevRow) * Math.abs(targetCol - PrevCol) == 1)
                 {
-                    if(isValidSquare(targetRow, targetCol)) 
+                    if(isValidSquare(targetRow, targetCol, board)) 
                     return true;
                 }
            
            if(Moved == false){
-             if (targetRow == PrevRow + 2 && targetCol == PrevCol && !PieceOnStraightLine(targetRow, targetCol)) {
-                if (PrevCol == 0 || PrevCol == 7) { // king must be on row 0 or 7
-                    for (Piece piece : GamePanel.Piece) {
-                        // rook at col+3, same row, not moved
-                        if (piece.Ids == Piece_types.ROOK && piece.col == PrevCol && piece.row == 7 && !piece.Moved && piece.PieceColor.equals(this.PieceColor)) {
-                            GamePanel.Castling = piece;
-                            return true;
-                        }
+             // Kingside castling: King moves 2 squares right (PrevRow + 2)
+             if (targetRow == PrevRow + 2 && targetCol == PrevCol && !PieceOnStraightLine(targetRow, targetCol,board)) {
+                for (Piece piece : GamePanel.Piece) {
+                    // Look for unmoved rook on the kingside (at col 7 for king's side)
+                    if (piece.Ids == Piece_types.ROOK && piece.col == PrevCol && piece.row == 7 && !piece.Moved && piece.PieceColor.equals(this.PieceColor)) {
+                        GamePanel.Castling = piece;
+                        return true;
                     }
                 }
             }
-            if(targetRow == PrevRow-2 && targetCol == PrevCol && !PieceOnStraightLine(targetRow, targetCol))
+            
+            // Queenside castling: King moves 2 squares left (PrevRow - 2)
+            if(targetRow == PrevRow-2 && targetCol == PrevCol && !PieceOnStraightLine(targetRow, targetCol,board))
             {        
-            Piece Square1 = isColliding(PrevRow - 1, PrevCol);
-            Piece Square2 = isColliding(PrevRow - 2, PrevCol);
-            Piece Square3 = isColliding(PrevRow - 3, PrevCol);   
                 for(Piece piece : GamePanel.Piece){
-                
+                    // Look for unmoved rook on the queenside (at col 0 for queen's side)
                     if(piece.Ids == Piece_types.ROOK && piece.col == PrevCol && piece.row == 0 && !piece.Moved && piece.PieceColor.equals(this.PieceColor)){
-                        if(Square1 == null && Square2 == null && Square3 == null && !PieceOnStraightLine(PrevRow, targetCol))
+                        // Check that squares between king and rook are empty
+                        Piece Square1 = isColliding(PrevRow - 1, PrevCol,board);
+                        Piece Square2 = isColliding(PrevRow - 2, PrevCol,board);
+                        Piece Square3 = isColliding(PrevRow - 3, PrevCol,board);
+                        
+                        if(Square1 == null && Square2 == null && Square3 == null && !PieceOnStraightLine(PrevRow, targetCol,board))
                         {
                             GamePanel.Castling = piece;
                             return true;
